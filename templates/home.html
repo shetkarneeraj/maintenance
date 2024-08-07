@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="mt-8 bg-white p-6 rounded-lg shadow dark:bg-gray-800">
+    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Maintenance Events</h3>
+    <div class="flex flex-wrap -mx-2">
+        <div class="w-full lg:w-1/2 px-2">
+            <canvas id="eventsGraph" class="mt-4"></canvas>
+        </div>
+        <div class="w-full lg:w-1/2 px-2">
+            <div id="chartDiv" class="mt-4" style="height: 440px;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-8 bg-white p-6 rounded-lg shadow dark:bg-gray-800">
+    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Maintenance Events Today</h2>
+    <div class="overflow-x-auto mt-4">
+        <table class="min-w-full bg-white dark:bg-gray-800 rounded-lg">
+            <thead>
+                <tr>
+                    <th class="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Type of Breakdown</th>
+                    <th class="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Reason</th>
+                    <th class="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Date</th>
+                    <th class="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Start Time</th>
+                    <th class="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700 dark:text-gray-200">End Time</th>
+                    <th class="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for maintenance in maintenances %}
+                <tr>
+                    <td class="px-4 py-2 border-b text-sm text-gray-700 dark:text-gray-200">{{ maintenance.type }}</td>
+                    <td class="px-4 py-2 border-b text-sm text-gray-700 dark:text-gray-200">{{ maintenance.name }}</td>
+                    <td class="px-4 py-2 border-b text-sm text-gray-700 dark:text-gray-200">{{ maintenance.date }}</td>
+                    <td class="px-4 py-2 border-b text-sm text-gray-700 dark:text-gray-200">{{ maintenance.start_time }}</td>
+                    <td class="px-4 py-2 border-b text-sm text-gray-700 dark:text-gray-200">{{ maintenance.end_time }}</td>
+                    <td class="px-4 py-2 border-b text-sm text-gray-700 dark:text-gray-200">{{ maintenance.duration }} mins</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block chart_js %}
+
+var bar_graph_keys = {{ maintenance_type_count["keys"] | safe }};
+var bar_graph_values = {{ maintenance_type_count["values"] | safe }};
+
+const ctx = document.getElementById('eventsGraph').getContext('2d');
+    const eventsGraph = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: bar_graph_keys,
+            datasets: [{
+                label: 'Number of Events',
+                data: bar_graph_values,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+var currentDate = '4/20/2020'; 
+var thresholdDate = norm(currentDate);
+var maintenances = {{ maintenances | safe }};
+  
+var chart = JSC.chart('chartDiv', { 
+  debug: true, 
+  title_label_text: 
+    'Maintenances for today', 
+  type: 'horizontal column solid', 
+  zAxis_scale_type: 'stacked', 
+  palette: ['#9adcfa', '#99e4ed', '#d0b6fa'], 
+  legend: { 
+    position: 'inside right top', 
+    template: '%icon %name'
+  }, 
+  toolbar_items_export_position: 
+    'inside bottom left', 
+  defaultPoint: { 
+    outline_width: 0, 
+    radius: 0, 
+    label: { 
+      text: pointLabelText, 
+      placement: 'outside'
+    }, 
+    tooltip: 
+      '<b>%name</b> Duration: %duration'
+  }, 
+  yAxis_scale_type: 'time', 
+  defaultSeries: { 
+    firstPoint: { 
+      outline: { color: 'darkenMore', width: 2 }, 
+      xAxisTick_label_text: '<b>%value</b>'
+    } 
+  }, 
+  series: [ 
+    {
+      points: maintenances
+    }, 
+  ] 
+}); 
+
+function pointLabelText(point) { 
+  var pY = point.options('y'); 
+  var pRange = pY.map(norm); 
+  if (thresholdDate > pRange[1]) { 
+    return getIconText( 
+      'material/navigation/check', 
+      '#66BB6A', 
+      16 
+    ); 
+  } else if (thresholdDate > pRange[0]) { 
+    return getIconText( 
+      'material/notification/sync', 
+      '#FDD835', 
+      20 
+    ); 
+  } 
+  return getIconText( 
+    'material/navigation/close', 
+    '#FF5252', 
+    16 
+  ); 
+} 
+  
+function norm(d) { 
+  return new Date(d).getTime(); 
+} 
+  
+function getIconText(name, color, size) { 
+  return ( 
+    '<icon name=' + 
+    name + 
+    ' size=' + 
+    size + 
+    ' fill=' + 
+    color + 
+    '>'
+  ); 
+} 
+
+document.addEventListener('DOMContentLoaded', function() {
+    var maintenances = {{ maintenances | safe }};
+    var datasets = maintenances.map(function(event) {
+        return {
+            label: event.reason,
+            data: [{
+                x: [new Date(event.start_time), new Date(event.end_time)],
+                y: event.reason
+            }],
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+        };
+    });
+
+    var ctx = document.getElementById('chartDiv').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            datasets: datasets
+        },
+        options: {
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'hour',
+                        tooltipFormat: 'MMM D, h:mm:ss a'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Time'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Maintenance Events'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            var start = context.raw.x[0];
+                            var end = context.raw.x[1];
+                            return context.dataset.label + ': ' + start.toLocaleString() + ' - ' + end.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+{% endblock %}
