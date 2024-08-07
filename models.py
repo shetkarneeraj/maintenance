@@ -20,12 +20,14 @@ class Maintenance(db.Model):
     start_time = db.Column(db.Time, nullable=False)
     end_time = db.Column(db.Time, nullable=False)
     mr = db.Column(db.String(150), nullable=False)
+    mill = db.Column(db.String(150), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def export_for_gantt_chart(self):
         start_time = f"{self.date.strftime('%m-%d-%Y')} {self.start_time.strftime('%H:%M:%S')}"
         end_time = f"{self.date.strftime('%m-%d-%Y')} {self.end_time.strftime('%H:%M:%S')}"
         return { 
+            "mill": self.mill,
             "type": self.types_of_breakdown,
             "duration": self.duration,
             "name": self.reason, 
@@ -41,6 +43,7 @@ class Maintenance(db.Model):
             'breakdown_description': self.breakdown_description,
             'corrective_action': self.corrective_action,
             "duration": self.duration,
+            "mill": self.mill,
             'start_time': f"{self.date.strftime('%m-%d-%Y')} {self.start_time.strftime('%H:%M:%S')}",  # Convert date and time to string
             'end_time': f"{self.date.strftime('%m-%d-%Y')} {self.end_time.strftime('%H:%M:%S')}",  # Convert date and time to string
             'mr': self.mr,

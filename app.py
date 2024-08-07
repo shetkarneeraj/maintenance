@@ -51,6 +51,7 @@ def home():
             "corrective_action": maintenance["corrective_action"],
             "duration": maintenance["duration"],
             "date": maintenance["date"],
+            "mill": maintenance["mill"],
             "name": maintenance["reason"],
             "start_time": maintenance["start_time"].split()[1],
             "end_time": maintenance["end_time"].split()[1],
@@ -110,7 +111,8 @@ def maintenance():
             start_time=form.start_time.data,
             end_time=form.end_time.data,
             mr=form.mr.data,
-            user_id=current_user.id
+            user_id=current_user.id,
+            mill = form.mill.data
         )
         db.session.add(maintenance_record)
         db.session.commit()

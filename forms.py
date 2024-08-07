@@ -33,5 +33,8 @@ class MaintenanceForm(FlaskForm):
     corrective_action = TextAreaField('Corrective Action to be Taken', validators=[DataRequired()])
     start_time = TimeField('Maintenance Start Time', validators=[DataRequired()])
     end_time = TimeField('Maintenance End Time', validators=[DataRequired()])
+    mill = SelectField('Reason', choices=[
+        'A', "B"
+    ], validators=[DataRequired()])
     mr = StringField('M.R.', validators=[DataRequired()])
     submit = SubmitField('Submit')

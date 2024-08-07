@@ -21,6 +21,7 @@
         <table class="min-w-full bg-white dark:bg-gray-800 rounded-lg">
             <thead>
                 <tr>
+                   <th class="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Mill</th>
                     <th class="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Type of Breakdown</th>
                     <th class="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Reason</th>
                     <th class="px-4 py-2 border-b text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Date</th>
@@ -32,6 +33,17 @@
             <tbody>
                 {% for maintenance in maintenances %}
                 <tr>
+                    <td class="px-4 py-2 border-b text-sm text-gray-700 dark:text-gray-200">
+                      {% if maintenance.mill == 'A' %}
+                        <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full">
+                          {{ maintenance.mill }}
+                        </button>
+                      {% else %}
+                        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
+                          {{ maintenance.mill }}
+                        </button>
+                      {% endif %}
+                    </td>
                     <td class="px-4 py-2 border-b text-sm text-gray-700 dark:text-gray-200">{{ maintenance.type }}</td>
                     <td class="px-4 py-2 border-b text-sm text-gray-700 dark:text-gray-200">{{ maintenance.name }}</td>
                     <td class="px-4 py-2 border-b text-sm text-gray-700 dark:text-gray-200">{{ maintenance.date }}</td>
